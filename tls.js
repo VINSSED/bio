@@ -41,12 +41,6 @@ const net = require("net");
     "HIGH:!aNULL:!eNULL:!LOW:!ADH:!RC4:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS",
     "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PSK"
   ],
-  accept_header = [
-    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3'
-  ],
   lang_header = [
     'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
     'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5',
@@ -211,16 +205,6 @@ function getRandomUserAgent() {
     return finalString;
   }
 
-  function cipher() {
-    return cplist[Math.floor(Math.random() * cplist.length)];
-  }
-
-  function randomIp() {
-    const ip = `${randomByte()}.${randomByte()}.${randomByte()}.${randomByte()}`;
-  
-    return isPrivate(ip) ? ip : randomIp();
-  }
-
   function UserAgents() {
     const userAgents = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
     return userAgents[Math.floor(Math.random() * userAgents.length)];
@@ -237,8 +221,6 @@ function getRandomUserAgent() {
   }
 
   const Header = new NetSocket();
-  headers["X-Forwarded-Host"] = randIp;
-  headers["X-Forwarded-For"] = randIp;
   headers[":method"] = "GET";
   headers[":path"] = parsedTarget.path;
   headers[":scheme"] = "https";
@@ -262,8 +244,6 @@ function getRandomUserAgent() {
      headers["user-agents"] = UserAgents();
      headers["user-agen"] = UserAgen();
      headers["Proxy"] = Proxy();
-     var cipher = cipher();
-     var randomIp = randomIp()
 
      const proxyOptions = {
          host: parsedProxy[0],
