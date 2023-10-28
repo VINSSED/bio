@@ -193,11 +193,6 @@ function getRandomUserAgent() {
     return userAgents[Math.floor(Math.random() * userAgents.length)];
   }
 
-  function Proxy() {
-    const Proxy = fs.readFileSync('proxy.txt', 'utf-8').split(/\r?\n/);
-    return Proxy[Math.floor(Math.random() * Proxy.length)];
-  }
-
   function UserAgen() {
     const userAgent = fs.readFileSync('ua.txt', 'utf-8').split(/\r?\n/);
     return userAgent[Math.floor(Math.random() * userAgent.length)];
@@ -226,7 +221,6 @@ function getRandomUserAgent() {
      headers["user-agent"] = getRandomUserAgent();
      headers["user-agents"] = UserAgents();
      headers["user-agen"] = UserAgen();
-     headers["Proxy"] = Proxy();
 
      const proxyOptions = {
          host: parsedProxy[0],
