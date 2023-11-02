@@ -200,6 +200,7 @@ function runFlooder() {
         "sec-fetch-user": "?1",
         "upgrade-insecure-requests": 1,
         "user-agent": userAgent,
+       "accept-header": randomElement(accept_header), //Tambahkan baris ini untuk mengatur lang header secara acak
         "accept-language": randomElement(lang_header), //Tambahkan baris ini untuk mengatur lang header secara acak
     }
 
